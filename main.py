@@ -139,7 +139,7 @@ root.geometry('400x200+200+200')
 title_bar = MyTitleBar(root) 
 window = tk.Canvas(root, bg=WINDOW_BACKGROUND, highlightthickness=0)
 
-# dummy button behind text box to give border to text box (must be a better way!)
+# dummy button behind text box to give border to text box and put orange lines on the window (must be a better way to do this!)
 btndummy1 = tk.Button(relief=FLAT, text='', background='#888')
 btndummy1.place(width=382, height=60,x=9,y=33)
 btndummy2 = tk.Button(relief=FLAT, text='', background='orange')
@@ -154,13 +154,14 @@ btndummy6 = tk.Button(relief=FLAT, text='', background='orange')
 btndummy6.place(width=1, height=200,x=399,y=0)
 
 # text box
-hashtext = tk.Text(root, undo=True, height = 3,background='#222',fg='#eee',border=0,padx=5,pady=5)
+hashtext = tk.Text(root, undo=True, height = 3,background='#222',fg='#eee',border=0,padx=5,pady=5, insertbackground='#eee')
 hashtext.place( width=380, x=10, y=34)
+hashtext.focus_set()
 
 # combobox
 style= ttk.Style()
 style.theme_use('clam')
-style.configure("TCombobox", fieldbackground= "#222", background= "#222", foreground="orange",darkcolor="#222",lightcolor="#222",  )
+style.configure("TCombobox", fieldbackground= "#222", background= "#222", foreground="orange",darkcolor="#222",lightcolor="#222" )
 combo = ttk.Combobox(root, width= 25,)
 combo.set("sha256")
 cache=list()
@@ -173,7 +174,7 @@ combo.place( width=100, x=10, y=100)
 combo.bind("<<ComboboxSelected>>",callbackfunc)
 
 # button
-btn = tk.Button(relief=FLAT, text='Hashify', command=lambda: hashbuttonpressed(hashtext.get("1.0", "end - 1 chars"),combo.get()),background='orange')
+btn = tk.Button(relief=FLAT, text='#ify', command=lambda: hashbuttonpressed(hashtext.get("1.0", "end - 1 chars"),combo.get()),background='orange')
 btn.place(width=70, height=18,x=320,y=100)
 
 # text box
