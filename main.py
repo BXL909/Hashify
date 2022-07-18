@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import COMMAND, FLAT, Frame, Text, ttk
-import hashit
+from tkinter import filedialog as fd
+import hashlib
 
 # --- constants ---
 
@@ -20,6 +21,8 @@ BUTTON_BACKGROUND_HOVER = 'orange'
 # window colors
 WINDOW_BACKGROUND = "#333"
 WINDOW_FOREGROUND = "orange"
+
+fileloc = ""
 
 # --- classes --- 
 
@@ -94,11 +97,33 @@ class MyTitleBar(tk.Frame):
     def on_other(self):
         hashedresultbox.config(state='normal')
         hashedresultbox.delete("1.0", "end")
-        hashedresultbox.insert("1.0",'#ify v0.1\n(file hashing in next version)\nhttps://github.com/BXL909\n \n'+RICKROLL)
+        hashedresultbox.insert("1.0",'#ify v1.0\nhttps://github.com/BXL909\n \n'+RICKROLL)
         hashedresultbox.config(state='disabled')
 
 
 # --- functions ---
+
+def is_it_in_tuple(tuple, thing_to_search):
+    for each_hash in tuple:
+        if each_hash == thing_to_search:
+            return True
+    return False 
+
+def hash_it(thing_to_be_hashed,type_of_hash_wanted):
+    import hashlib
+
+    #validate type_of_hash_wanted
+    if is_it_in_tuple(hashlib.algorithms_available, type_of_hash_wanted):
+        #convert to bytes
+        byte_encoded_thing_to_be_hashed = thing_to_be_hashed.encode()
+        #construct the function name e.g hashlib.sha256(thingtobehashed) and call it. This is to avoid a massive IF statement.. 
+        # e.g if sha256 then hashlib.sha256(blah). if sha384 then hashlib.sha384blahblah, etc.
+        hashed_result = eval("hashlib." + type_of_hash_wanted)(byte_encoded_thing_to_be_hashed)
+        #construct a list to return to the calling code
+        hashed_list = [str(hashed_result.hexdigest()), str(hashed_result.digest_size), str(hashed_result.block_size)]
+        return hashed_list
+    else:
+        print ("Invalid selection")
 
 def hashbuttonpressed(a,b):
     algo_valid = 'n'
@@ -111,12 +136,56 @@ def hashbuttonpressed(a,b):
         hashedresultbox.insert("1.0",'There is no spoon')
         hashedresultbox.config(state='disabled')
     else:
-        hashedresult = hashit.hash_it(a,b)
+        hashedresult = hash_it(a,b)
         hashedresultbox.config(state='normal')
         hashedresultbox.delete("1.0", "end")
         hashedresultbox.insert("1.0",hashedresult[0])
         hashedresultbox.config(state='disabled')
-        print (hashedresult)
+        stringforlabel = b+" hash for input '" + a + "'"
+        if len(stringforlabel) > 60:
+            formattedstringforlabel = (stringforlabel[:60]+'...')
+        else:
+            formattedstringforlabel = stringforlabel
+        #remove new lines from the string (purely for displaying)
+        hashinfolabel = tk.Label(root, text=formattedstringforlabel.replace('\n', ''),background='#333', fg='orange',anchor="w",justify="left")
+        hashinfolabel.place(width=380,x=10, y=158)        
+        
+def hashfile(type_of_hash_wanted,stringtohash):
+    algo_valid = 'n'
+    for algorithm in algos_available:
+        if algorithm == combo.get():
+            algo_valid = 'y'
+    if algo_valid != 'y':
+        hashedresultbox.config(state='normal')
+        hashedresultbox.delete("1.0", "end")
+        hashedresultbox.insert("1.0",'There is no spoon')
+        hashedresultbox.config(state='disabled')
+    else:
+        if stringtohash == "":
+            hashinfolabel = tk.Label(root, text="You need to select a file first",background='#333', fg='orange',anchor="w",justify="left")
+            hashinfolabel.place(width=380,x=10, y=158)                
+        else:
+            filename = stringtohash
+            h = eval("hashlib." + type_of_hash_wanted + "()")
+            with open(filename, 'rb') as file:
+                while True:
+                    # Reading is buffered, so we can read smaller chunks.
+                    chunk = file.read(h.block_size)
+                    if not chunk:
+                        break
+                    h.update(chunk)
+            hashedresultbox.config(state='normal')
+            hashedresultbox.delete("1.0", "end")
+            hashedresultbox.insert("1.0",h.hexdigest())
+            hashedresultbox.config(state='disabled')
+            stringforlabel = type_of_hash_wanted + " hash for file " + filename
+            if len(stringforlabel) > 60:
+                formattedstringforlabel = (stringforlabel[:60]+'...')
+            else:
+                formattedstringforlabel = stringforlabel
+            #remove new lines from the string (purely for displaying)
+            hashinfolabel = tk.Label(root, text=formattedstringforlabel.replace('\n', ''),background='#333', fg='orange',anchor="w",justify="left")
+            hashinfolabel.place(width=380,x=10, y=158)           
 
 def callbackfunc(event):
     hashtext.focus()
@@ -127,42 +196,56 @@ def copytextbox():
     root.clipboard_append(hashedresultbox.get(1.0,'end'))
     root.update()
     copiedlabel = tk.Label(root, text='Copied to clipboard',background='#333', fg='orange')
-    copiedlabel.place(width=120,x=140, y=100)
+    copiedlabel.place(width=114,x=110, y=130)
     root.after(3000, copiedlabel.destroy)    
+
+def openfile():
+    filename = fd.askopenfilename()
+    global fileloc
+    fileloc = filename
+    if len(filename) > 38:
+        filenamefordisplay = (filename[:38]+'...')
+    else:
+        filenamefordisplay = filename
+    filelocationlabel = tk.Label(root, text=filenamefordisplay,background='#333', fg='#eee',anchor="w",justify="left")
+    filelocationlabel.place(width=280,x=41, y=34)   
+    
+    
+
 
 # --- main ---
 
 root = tk.Tk()
 
 root.overrideredirect(True)
-root.geometry('400x200+200+200')
+root.geometry('400x240+200+200')
 title_bar = MyTitleBar(root) 
 window = tk.Canvas(root, bg=WINDOW_BACKGROUND, highlightthickness=0)
 
 # dummy button behind text box to give border to text box and put orange lines on the window (must be a better way to do this!)
 btndummy1 = tk.Button(relief=FLAT, text='', background='#888')
-btndummy1.place(width=382, height=60,x=9,y=33)
+btndummy1.place(width=382, height=60,x=9,y=61)
 btndummy2 = tk.Button(relief=FLAT, text='', background='orange')
 btndummy2.place(width=400, height=1,x=0,y=23)
 btndummy3 = tk.Button(relief=FLAT, text='', background='orange')
-btndummy3.place(width=400, height=1,x=0,y=199)
+btndummy3.place(width=400, height=1,x=0,y=239)
 btndummy4 = tk.Button(relief=FLAT, text='', background='orange')
 btndummy4.place(width=400, height=1,x=0,y=0)
 btndummy5 = tk.Button(relief=FLAT, text='', background='orange')
-btndummy5.place(width=1, height=200,x=0,y=0)
+btndummy5.place(width=1, height=250,x=0,y=0)
 btndummy6 = tk.Button(relief=FLAT, text='', background='orange')
-btndummy6.place(width=1, height=200,x=399,y=0)
+btndummy6.place(width=1, height=250,x=399,y=0)
 
 # text box
 hashtext = tk.Text(root, undo=True, height = 3,background='#222',fg='#eee',border=0,padx=5,pady=5, insertbackground='#eee')
-hashtext.place( width=380, x=10, y=34)
+hashtext.place( width=380, x=10, y=62)
 hashtext.focus_set()
 
 # combobox
 style= ttk.Style()
 style.theme_use('clam')
 style.configure("TCombobox", fieldbackground= "#222", background= "#222", foreground="orange",darkcolor="#222",lightcolor="#222" )
-combo = ttk.Combobox(root, width= 25,)
+combo = ttk.Combobox(root, width= 70,)
 combo.set("sha256")
 cache=list()
 algos_available = ['sha3_224', 'sha3_384', 'sha512', 'sha3_256', 'sha3_512', 'sha256', 'sha1', 'sha224', 'md5', 'blake2b', 'blake2s', 'sha384']
@@ -170,19 +253,35 @@ algos_available.sort()
 for algorithm in algos_available:
     cache.append(algorithm)
 combo['values'] = cache
-combo.place( width=100, x=10, y=100)
+combo.place( width=70, x=10, y=130)
 combo.bind("<<ComboboxSelected>>",callbackfunc)
 
-# button
-btn = tk.Button(relief=FLAT, text='#ify', command=lambda: hashbuttonpressed(hashtext.get("1.0", "end - 1 chars"),combo.get()),background='orange')
-btn.place(width=70, height=18,x=320,y=100)
+# open file button
+btnopenfile = tk.Button(relief=FLAT, text='open', command=lambda: openfile(),background='orange')
+btnopenfile.place(width=60, height=18,x=330,y=34)
+
+# hash input button
+btn = tk.Button(relief=FLAT, text='#ify input', command=lambda: hashbuttonpressed(hashtext.get("1.0", "end - 1 chars"),combo.get()),background='orange')
+btn.place(width=60, height=18,x=330,y=130)
+
+# hash file button
+btnhashfile = tk.Button(relief=FLAT, text='#ify file', command=lambda: hashfile(combo.get(),fileloc),background='orange')
+btnhashfile.place(width=60, height=18,x=260,y=130)
 
 # text box
 hashedresultbox = tk.Text(root, undo=True, height = 3,background='#333',fg='#eee',border=0,padx=5,pady=5,cursor="hand2")
-hashedresultbox.place(width=390,x=6,y=128)
+hashedresultbox.place(width=390,x=6,y=174)
 hashedresultbox.insert("1.0", " ")
 hashedresultbox.config(state='disabled')
 hashedresultbox.bind("<Button-1>", lambda e:copytextbox())
+
+#label 
+fileinfolabel = tk.Label(root, text="File: ",background='#333', fg='orange',anchor="w",justify="left")
+fileinfolabel.place(width=40,x=10, y=34)           
+
+#label
+filelocationlabel = tk.Label(root, text="Open a file or enter text below to be hashed",background='#333', fg='#eee',anchor="w",justify="left")
+filelocationlabel.place(width=280,x=41, y=34)           
 
 # pack the widgets
 window.pack(expand=True, fill='both')
