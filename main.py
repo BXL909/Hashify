@@ -95,6 +95,10 @@ class MyTitleBar(tk.Frame):
         self.master.geometry(f'+{x}+{y}')
         
     def on_other(self):
+        #hide any label that might exist from previous hashes
+        hashinfolabel = tk.Label(root, text="",background='#333', fg='orange',anchor="w",justify="left")
+        hashinfolabel.place(width=380,x=10, y=158)           
+
         hashedresultbox.config(state='normal')
         hashedresultbox.delete("1.0", "end")
         hashedresultbox.insert("1.0",'#ify v1.0\nhttps://github.com/BXL909\n \n'+RICKROLL)
