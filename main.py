@@ -265,7 +265,7 @@ btnopenfile = tk.Button(relief=FLAT, text='open', command=lambda: openfile(),bac
 btnopenfile.place(width=60, height=18,x=330,y=34)
 
 # hash input button
-btn = tk.Button(relief=FLAT, text='#ify input', command=lambda: hashbuttonpressed(hashtext.get("1.0", "end - 1 chars"),combo.get()),background='orange')
+btn = tk.Button(relief=FLAT, text='#ify text', command=lambda: hashbuttonpressed(hashtext.get("1.0", "end - 1 chars"),combo.get()),background='orange')
 btn.place(width=60, height=18,x=330,y=130)
 
 # hash file button
@@ -284,7 +284,7 @@ fileinfolabel = tk.Label(root, text="File: ",background='#333', fg='orange',anch
 fileinfolabel.place(width=40,x=10, y=34)           
 
 #label
-filelocationlabel = tk.Label(root, text="Open a file or enter text below to be hashed",background='#333', fg='#eee',anchor="w",justify="left")
+filelocationlabel = tk.Label(root, text="No file selected.",background='#333', fg='#eee',anchor="w",justify="left")
 filelocationlabel.place(width=280,x=41, y=34)           
 
 # pack the widgets
