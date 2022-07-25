@@ -101,7 +101,7 @@ class MyTitleBar(tk.Frame):
 
         hashedresultbox.config(state='normal')
         hashedresultbox.delete("1.0", "end")
-        hashedresultbox.insert("1.0",'#ify v1.0\nhttps://github.com/BXL909\n \n'+RICKROLL)
+        hashedresultbox.insert("1.0",'#ify v1.1\nhttps://github.com/BXL909\n \n'+RICKROLL)
         hashedresultbox.config(state='disabled')
 
 
