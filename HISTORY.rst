@@ -1,6 +1,12 @@
 Release History
 ===============
 
+1.1 (2022-07-25)
+------------------
+
+- update initial file message
+- update button text
+
 1.0 (2022-07-18)
 ------------------
 
